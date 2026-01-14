@@ -1,0 +1,628 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🦀 CRAB RACE 🦀</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap');
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --sand: #f4d9a0;
+            --sand-dark: #d4b87a;
+            --ocean: #1a5f7a;
+            --ocean-deep: #0d3d4d;
+            --gold: #ffd700;
+            --gold-dark: #b8960b;
+            --crab-red: #e74c3c;
+            --crab-orange: #e67e22;
+            --crab-purple: #9b59b6;
+            --crab-blue: #3498db;
+            --crab-green: #27ae60;
+        }
+
+        body {
+            font-family: 'VT323', monospace;
+            background: linear-gradient(180deg, var(--ocean) 0%, var(--ocean-deep) 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+            color: #fff;
+        }
+
+        h1 {
+            font-family: 'Press Start 2P', cursive;
+            font-size: clamp(1.5rem, 5vw, 2.5rem);
+            text-shadow: 4px 4px 0 var(--ocean-deep), 
+                         -2px -2px 0 var(--gold);
+            margin-bottom: 10px;
+            animation: title-bounce 0.5s ease-in-out infinite alternate;
+            text-align: center;
+        }
+
+        @keyframes title-bounce {
+            from { transform: translateY(0); }
+            to { transform: translateY(-5px); }
+        }
+
+        .subtitle {
+            font-size: 1.5rem;
+            color: var(--sand);
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .gold-display {
+            font-family: 'Press Start 2P', cursive;
+            font-size: clamp(1rem, 3vw, 1.5rem);
+            background: linear-gradient(180deg, var(--gold) 0%, var(--gold-dark) 100%);
+            color: #000;
+            padding: 15px 30px;
+            border-radius: 10px;
+            border: 4px solid #000;
+            box-shadow: 4px 4px 0 #000;
+            margin-bottom: 20px;
+        }
+
+        .gold-display .coin {
+            display: inline-block;
+            animation: spin-coin 1s linear infinite;
+        }
+
+        @keyframes spin-coin {
+            0%, 100% { transform: scaleX(1); }
+            50% { transform: scaleX(0.2); }
+        }
+
+        .race-track {
+            width: 100%;
+            max-width: 800px;
+            background: 
+                repeating-linear-gradient(
+                    90deg,
+                    var(--sand) 0px,
+                    var(--sand) 40px,
+                    var(--sand-dark) 40px,
+                    var(--sand-dark) 80px
+                );
+            border: 6px solid #5d4e37;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+            position: relative;
+            box-shadow: inset 0 0 30px rgba(0,0,0,0.3), 4px 4px 0 #000;
+        }
+
+        .finish-line {
+            position: absolute;
+            right: 30px;
+            top: 0;
+            bottom: 0;
+            width: 20px;
+            background: repeating-linear-gradient(
+                180deg,
+                #000 0px,
+                #000 10px,
+                #fff 10px,
+                #fff 20px
+            );
+            border-left: 3px solid #333;
+        }
+
+        .lane {
+            display: flex;
+            align-items: center;
+            height: 60px;
+            margin: 10px 0;
+            background: rgba(255,255,255,0.1);
+            border-radius: 5px;
+            position: relative;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: 3px solid transparent;
+        }
+
+        .lane:hover:not(.racing) {
+            background: rgba(255,255,255,0.25);
+            transform: scale(1.02);
+        }
+
+        .lane.selected {
+            border-color: var(--gold);
+            box-shadow: 0 0 15px var(--gold);
+        }
+
+        .lane.racing {
+            cursor: default;
+        }
+
+        .lane-number {
+            font-family: 'Press Start 2P', cursive;
+            font-size: 0.7rem;
+            width: 30px;
+            text-align: center;
+            color: #5d4e37;
+        }
+
+        .crab {
+            font-size: 2.5rem;
+            position: relative;
+            left: 0;
+            transition: left 0.1s linear;
+            filter: drop-shadow(2px 2px 0 rgba(0,0,0,0.3));
+            z-index: 10;
+        }
+
+        .crab.walking {
+            animation: crab-walk 0.2s steps(2) infinite;
+        }
+
+        @keyframes crab-walk {
+            0% { transform: translateY(0) rotate(-5deg); }
+            50% { transform: translateY(-3px) rotate(5deg); }
+            100% { transform: translateY(0) rotate(-5deg); }
+        }
+
+        .crab-name {
+            font-family: 'Press Start 2P', cursive;
+            font-size: 0.5rem;
+            color: #5d4e37;
+            margin-left: 10px;
+            text-transform: uppercase;
+        }
+
+        .crab-stats {
+            font-size: 0.9rem;
+            color: #5d4e37;
+            margin-left: auto;
+            margin-right: 40px;
+            opacity: 0.8;
+        }
+
+        .controls {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+
+        button {
+            font-family: 'Press Start 2P', cursive;
+            font-size: clamp(0.6rem, 2vw, 0.9rem);
+            padding: 15px 25px;
+            border: 4px solid #000;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.1s;
+            box-shadow: 4px 4px 0 #000;
+        }
+
+        button:hover:not(:disabled) {
+            transform: translate(2px, 2px);
+            box-shadow: 2px 2px 0 #000;
+        }
+
+        button:active:not(:disabled) {
+            transform: translate(4px, 4px);
+            box-shadow: 0px 0px 0 #000;
+        }
+
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .btn-race {
+            background: linear-gradient(180deg, #4ade80 0%, #22c55e 100%);
+            color: #000;
+        }
+
+        .btn-reset {
+            background: linear-gradient(180deg, #f87171 0%, #ef4444 100%);
+            color: #000;
+        }
+
+        .message {
+            font-family: 'Press Start 2P', cursive;
+            font-size: clamp(0.8rem, 2.5vw, 1.2rem);
+            text-align: center;
+            padding: 20px;
+            margin-bottom: 20px;
+            min-height: 60px;
+            line-height: 1.8;
+        }
+
+        .message.win {
+            color: var(--gold);
+            animation: flash-win 0.3s ease-in-out infinite alternate;
+        }
+
+        .message.lose {
+            color: #f87171;
+        }
+
+        @keyframes flash-win {
+            from { text-shadow: 0 0 10px var(--gold); }
+            to { text-shadow: 0 0 30px var(--gold), 0 0 50px var(--gold); }
+        }
+
+        .game-over {
+            font-family: 'Press Start 2P', cursive;
+            font-size: 2rem;
+            color: #ef4444;
+            text-shadow: 4px 4px 0 #000;
+            animation: game-over-shake 0.5s ease-in-out infinite;
+        }
+
+        @keyframes game-over-shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+
+        .history {
+            width: 100%;
+            max-width: 400px;
+            background: rgba(0,0,0,0.3);
+            border-radius: 10px;
+            padding: 15px;
+            margin-top: 10px;
+        }
+
+        .history h3 {
+            font-family: 'Press Start 2P', cursive;
+            font-size: 0.7rem;
+            margin-bottom: 10px;
+            color: var(--sand);
+        }
+
+        .history-item {
+            font-size: 1.1rem;
+            padding: 5px 0;
+            border-bottom: 1px dashed rgba(255,255,255,0.2);
+        }
+
+        .history-item:last-child {
+            border-bottom: none;
+        }
+
+        .history-item.win { color: #4ade80; }
+        .history-item.lose { color: #f87171; }
+
+        .footer {
+            margin-top: auto;
+            padding-top: 20px;
+            font-size: 1rem;
+            opacity: 0.6;
+            text-align: center;
+        }
+
+        .footer a {
+            color: var(--sand);
+        }
+
+        /* Bubbles effect */
+        .bubbles {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            overflow: hidden;
+            z-index: -1;
+        }
+
+        .bubble {
+            position: absolute;
+            bottom: -50px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 50%;
+            animation: rise 8s infinite;
+        }
+
+        @keyframes rise {
+            0% {
+                transform: translateY(0) translateX(0);
+                opacity: 0.5;
+            }
+            50% {
+                opacity: 0.3;
+            }
+            100% {
+                transform: translateY(-100vh) translateX(50px);
+                opacity: 0;
+            }
+        }
+
+        /* Responsive */
+        @media (max-width: 600px) {
+            .crab-stats {
+                display: none;
+            }
+            .crab-name {
+                font-size: 0.4rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="bubbles" id="bubbles"></div>
+    
+    <h1>🦀 CRAB RACE 🦀</h1>
+    <p class="subtitle">Pick your crab. Double your gold. Don't go broke!</p>
+    
+    <div class="gold-display">
+        <span class="coin">🪙</span> GOLD: <span id="gold">1</span>
+    </div>
+    
+    <div class="message" id="message">Click a crab to select it, then hit RACE!</div>
+    
+    <div class="race-track" id="track">
+        <div class="finish-line"></div>
+        <!-- Lanes generated by JS -->
+    </div>
+    
+    <div class="controls">
+        <button class="btn-race" id="raceBtn" disabled>🏁 RACE!</button>
+        <button class="btn-reset" id="resetBtn">🔄 NEW GAME</button>
+    </div>
+
+    <div class="history">
+        <h3>📜 Race History</h3>
+        <div id="history">
+            <div class="history-item" style="opacity: 0.5">No races yet...</div>
+        </div>
+    </div>
+
+    <div class="footer">
+        <p>A nostalgic tribute to early 2000s browser games</p>
+        <p>Inspect the source - hack away! 🦀</p>
+    </div>
+
+    <script>
+        // ===========================================
+        // 🦀 CRAB RACE - The Game 🦀
+        // Feel free to inspect and modify!
+        // Just like the good old days...
+        // ===========================================
+
+        const CRABS = [
+            { name: 'Pinchy', emoji: '🦀', color: '#e74c3c', speed: 0.7, luck: 1.3 },
+            { name: 'Clawdia', emoji: '🦞', color: '#e67e22', speed: 1.0, luck: 1.0 },
+            { name: 'Sebastian', emoji: '🦐', color: '#9b59b6', speed: 1.2, luck: 0.8 },
+            { name: 'Mr. Krabs', emoji: '🦀', color: '#f1c40f', speed: 0.9, luck: 1.1 },
+            { name: 'Snippy', emoji: '🦞', color: '#3498db', speed: 1.1, luck: 0.9 },
+        ];
+
+        // Game state
+        let gold = 1;
+        let selectedCrab = null;
+        let isRacing = false;
+        let raceHistory = [];
+
+        // DOM elements
+        const goldDisplay = document.getElementById('gold');
+        const message = document.getElementById('message');
+        const track = document.getElementById('track');
+        const raceBtn = document.getElementById('raceBtn');
+        const resetBtn = document.getElementById('resetBtn');
+        const historyEl = document.getElementById('history');
+
+        // Initialize the game
+        function init() {
+            createBubbles();
+            createLanes();
+            updateDisplay();
+        }
+
+        // Create background bubbles
+        function createBubbles() {
+            const container = document.getElementById('bubbles');
+            for (let i = 0; i < 15; i++) {
+                const bubble = document.createElement('div');
+                bubble.className = 'bubble';
+                bubble.style.left = Math.random() * 100 + '%';
+                bubble.style.width = bubble.style.height = (Math.random() * 30 + 10) + 'px';
+                bubble.style.animationDelay = Math.random() * 8 + 's';
+                bubble.style.animationDuration = (Math.random() * 4 + 6) + 's';
+                container.appendChild(bubble);
+            }
+        }
+
+        // Create race lanes
+        function createLanes() {
+            const finishLine = track.querySelector('.finish-line');
+            track.innerHTML = '';
+            track.appendChild(finishLine);
+
+            CRABS.forEach((crab, index) => {
+                const lane = document.createElement('div');
+                lane.className = 'lane';
+                lane.dataset.index = index;
+                lane.innerHTML = `
+                    <span class="lane-number">${index + 1}</span>
+                    <span class="crab" id="crab-${index}" style="filter: drop-shadow(2px 2px 0 ${crab.color})">${crab.emoji}</span>
+                    <span class="crab-name">${crab.name}</span>
+                    <span class="crab-stats">SPD: ${crab.speed.toFixed(1)} | LCK: ${crab.luck.toFixed(1)}</span>
+                `;
+                lane.addEventListener('click', () => selectCrab(index));
+                track.appendChild(lane);
+            });
+        }
+
+        // Select a crab
+        function selectCrab(index) {
+            if (isRacing || gold <= 0) return;
+
+            document.querySelectorAll('.lane').forEach(l => l.classList.remove('selected'));
+            document.querySelectorAll('.lane')[index].classList.add('selected');
+            selectedCrab = index;
+            raceBtn.disabled = false;
+            message.className = 'message';
+            message.textContent = `You picked ${CRABS[index].name}! Hit RACE to bet your gold!`;
+        }
+
+        // Start the race!
+        function startRace() {
+            if (selectedCrab === null || isRacing || gold <= 0) return;
+
+            isRacing = true;
+            raceBtn.disabled = true;
+            document.querySelectorAll('.lane').forEach(l => l.classList.add('racing'));
+            message.className = 'message';
+            message.textContent = '🏁 AND THEY\'RE OFF! 🏁';
+
+            // Reset crab positions
+            CRABS.forEach((_, i) => {
+                const crab = document.getElementById(`crab-${i}`);
+                crab.style.left = '0px';
+                crab.classList.add('walking');
+            });
+
+            // Race logic
+            const positions = CRABS.map(() => 0);
+            const trackWidth = track.clientWidth - 120; // Account for finish line and padding
+            let winner = null;
+
+            const raceInterval = setInterval(() => {
+                CRABS.forEach((crab, i) => {
+                    if (winner !== null) return;
+
+                    // Random movement based on speed and luck
+                    const baseMove = Math.random() * 10 * crab.speed;
+                    const luckBonus = Math.random() < 0.1 ? crab.luck * 15 : 0;
+                    positions[i] += baseMove + luckBonus;
+
+                    const crabEl = document.getElementById(`crab-${i}`);
+                    crabEl.style.left = Math.min(positions[i], trackWidth) + 'px';
+
+                    // Check for winner
+                    if (positions[i] >= trackWidth) {
+                        winner = i;
+                    }
+                });
+
+                if (winner !== null) {
+                    clearInterval(raceInterval);
+                    endRace(winner);
+                }
+            }, 50);
+        }
+
+        // End the race
+        function endRace(winner) {
+            CRABS.forEach((_, i) => {
+                document.getElementById(`crab-${i}`).classList.remove('walking');
+            });
+
+            const won = winner === selectedCrab;
+            const previousGold = gold;
+
+            if (won) {
+                gold *= 2;
+                message.className = 'message win';
+                message.innerHTML = `🎉 ${CRABS[winner].name} WINS! 🎉<br>You doubled your gold to ${gold}!`;
+            } else {
+                gold = 0;
+                message.className = 'message lose';
+                message.innerHTML = `💀 ${CRABS[winner].name} wins...<br>You lost everything! GAME OVER`;
+            }
+
+            // Add to history
+            raceHistory.unshift({
+                won,
+                crab: CRABS[selectedCrab].name,
+                winner: CRABS[winner].name,
+                goldBefore: previousGold,
+                goldAfter: gold
+            });
+            updateHistory();
+
+            // Reset state
+            isRacing = false;
+            selectedCrab = null;
+            document.querySelectorAll('.lane').forEach(l => {
+                l.classList.remove('selected', 'racing');
+            });
+
+            updateDisplay();
+
+            // If game over, show reset prompt
+            if (gold <= 0) {
+                raceBtn.disabled = true;
+            }
+        }
+
+        // Update the display
+        function updateDisplay() {
+            goldDisplay.textContent = gold;
+            
+            if (gold <= 0) {
+                raceBtn.disabled = true;
+            }
+        }
+
+        // Update history display
+        function updateHistory() {
+            historyEl.innerHTML = raceHistory.slice(0, 10).map(h => `
+                <div class="history-item ${h.won ? 'win' : 'lose'}">
+                    ${h.won ? '✅' : '❌'} Bet on ${h.crab} (${h.goldBefore}g) → ${h.winner} won → ${h.goldAfter}g
+                </div>
+            `).join('');
+        }
+
+        // Reset the game
+        function resetGame() {
+            gold = 1;
+            selectedCrab = null;
+            isRacing = false;
+            raceHistory = [];
+            
+            createLanes();
+            updateDisplay();
+            updateHistory();
+            historyEl.innerHTML = '<div class="history-item" style="opacity: 0.5">No races yet...</div>';
+            
+            message.className = 'message';
+            message.textContent = 'Click a crab to select it, then hit RACE!';
+            raceBtn.disabled = true;
+        }
+
+        // Event listeners
+        raceBtn.addEventListener('click', startRace);
+        resetBtn.addEventListener('click', resetGame);
+
+        // Keyboard shortcuts (for that authentic feel)
+        document.addEventListener('keydown', (e) => {
+            if (e.key >= '1' && e.key <= '5') {
+                selectCrab(parseInt(e.key) - 1);
+            }
+            if (e.key === ' ' || e.key === 'Enter') {
+                if (!raceBtn.disabled) startRace();
+            }
+            if (e.key === 'r' || e.key === 'R') {
+                resetGame();
+            }
+        });
+
+        // Start the game!
+        init();
+
+        // ===========================================
+        // 🦀 TIP: Open console and try:
+        // gold = 1000;  // Cheat code! 
+        // updateDisplay();
+        // ===========================================
+    </script>
+</body>
+</html>
